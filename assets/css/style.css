@@ -1,0 +1,72 @@
+#pokemon-logo {
+	height: 200px;
+	width:500px;
+}
+
+
+@font-face {
+    font-family: pokemonFont;
+    src: url(PokemonGB.ttf);
+}
+
+#word-box, #image-box {
+	
+	font-family: pokemonFont ;
+}
+
+#icon-spot{
+  position: absolute;
+  bottom: 5px;
+  right: 15px;
+}
+
+#word-box {
+	border-style: double;
+	border-color: #666666;
+	border-width: 6px;
+  position: relative;
+  height: 225px;
+  width: 550px;
+  margin: 0 auto;
+}
+
+#top-box {
+  position: relative;
+  width: 550px;
+  height: 350px;
+  margin: 0 auto;
+}
+
+
+
+.container { margin-top: 25px; }
+
+
+#player { 
+  position: absolute;
+  bottom: 15px;
+  left: 30px;
+ }
+
+.battle-target {
+  position: absolute;
+  top: 15px;
+  right: 30px;
+ }
+ }
+#button-up{
+	margin-left: 30px;
+}
+#button-down{
+	margin-left: 30px;
+}
+
+.btn-circle.btn-lg {
+  width: 50px;
+  height: 50px;
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.33;
+  border-radius: 25px;
+  margin-left: 40px;
+}
