@@ -14,6 +14,22 @@
 	font-family: pokemonFont ;
 }
 
+#enemy-hp-box {
+  position: absolute;
+  left: 10px;
+  top: 25px;
+  width: 175px;
+  height: 75px;
+}
+
+#player-hp-box {
+  position: absolute;
+  right: 15px;
+  bottom: 25px;
+  width: 200px;
+  height: 75px;
+}
+
 #icon-spot{
   position: absolute;
   bottom: 5px;
@@ -37,7 +53,9 @@
   margin: 0 auto;
 }
 
-
+.attack-but {
+  float:right;
+}
 
 .container { margin-top: 25px; }
 
