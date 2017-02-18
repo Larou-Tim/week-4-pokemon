@@ -28,24 +28,10 @@ $(document).ready(function() {
 	var enemyPokemon;
 	var playerLevel = 20;
 	
-
 	var playerMaxHP;
 	var playerCurHP;
-
-
-	var enemyHP;
-
-
-	/* only have lowering effects
-		-6 .25
-		-5 = .28
-		-4 = .33
-		-3 = .4
-		-2 = .5
-		-1 = .66
-		0 = 1
-
-	*/
+	var enemyCurHP ;
+	var enemyMaxHP ;
 
 	// pokemon choices and all relevant info 
 	var pokemon = {
@@ -75,7 +61,8 @@ $(document).ready(function() {
 					name: "Tail Whip",
 					// power: 35,
 					accuracy: 1,
-					attack: false
+					attack: false,
+					stat: 'defense'
 					// type: 1.5,
 				},
 				{
@@ -84,6 +71,7 @@ $(document).ready(function() {
 					// power: 20,
 					// type: 1.5,
 					accuracy: 1,
+					stat: 'attack',
 					attack: false
 
 				},
@@ -125,7 +113,8 @@ $(document).ready(function() {
 					//lowers def
 					name: "Tail Whip",
 					accuracy: 1,
-					attack: false
+					attack: false,
+					stat: "defense"
 				},
 				{
 					name: "Bubble",
@@ -148,7 +137,7 @@ $(document).ready(function() {
 					type: 'water'
 
 				}
-				]
+			]
 		},
 
 		charmander : {
@@ -184,12 +173,14 @@ $(document).ready(function() {
 					//decreases attack
 					name: "Growl",
 					attack: false,
-					accuracy:1
+					accuracy: 1 ,
+					stat: 'attack'
 
 				},
 				{
 					//lowers def 1 stage
 					name:"Leer",
+					stat: 'defense',
 					accuracy: .9,
 					attack: true
 				}
@@ -231,6 +222,7 @@ $(document).ready(function() {
 					//decreases attack
 					name: "Growl",
 					attack: false,
+					stat: 'attack',
 					accuracy: 1
 
 				},
@@ -294,8 +286,18 @@ $(document).ready(function() {
   		typeWords("You chose to battle " + pokemon[selectedChar].name + ". Good luck!")
   		enemyPokemon = selectedChar;
   		battleStart = true;
+
+  		addStats();
   		// startBattle(selectedChar);
 	});
+
+	function addStats() {
+		playerMaxHP = pokemon[playerPokemon].hp;
+		playerCurHP = playerMaxHP;
+		enemyMaxHP = pokemon[enemyPokemon].hp;
+		enemyCurHP = enemyMaxHP;
+
+	}
 
 	// $(".char-select").on("click", function() {
 	// 	// characterSelect("squirtle");
@@ -310,13 +312,13 @@ $(document).ready(function() {
 
 	// ***** these words are not being typed
 	//handles who player selected 
-	function characterSelect(selected) {
-		$("#image-box").empty();
-		$("#text-display").stop();
-		$("#text-display").empty();
+	// function characterSelect(selected) {
+	// 	$("#image-box").empty();
+	// 	$("#text-display").stop();
+	// 	$("#text-display").empty();
 
-		typeWords("You have selected " + selected + ", good choice! Who would you like to battle first?");
-	}
+	// 	typeWords("You have selected " + selected + ", good choice! Who would you like to battle first?");
+	// }
 
 	//handles the display of non defeated enemy pokemon and asks who to battle
 	function playerAdd(playerChacter) {
@@ -347,67 +349,144 @@ $(document).ready(function() {
 	// handles damage dealing attacks
 
 	function attackCalc(user, move) {
-			//floor(floor(floor(2 * Level / 5 + 2) * Attack * Base Power / Defense) / 50) + 2
-
-			//or ((2 * level + 10) / 250) * (base * stab * type * critical * others * rand)
-
-			// stab is same type bonus ( pika using electir)
-			//type is if its super effective 
-			// critical 2 if it is
-
-
-
-			// so pika hits squirt
-			// ((2 * 1 +10)/250) = .048
-			// * (40 * 1.5 * 4 * 1) = 240 
-			// would be 11.52 damage (seems low)
-
-			var stabLevel;
-			var base;
-			var level;
-			var typeBonus;
-			var critical;
-			var attackLevel;
-			var defenseLevel;
-			//want to be between .85 and 1.15
-			var rand = Math.floor((Math.random()*(115-85))+85)/100;
-			var damageOutput;
-
-
+		var stabLevel;
+		var base;
+		var level;
+		var typeBonus;
+		var critical;
+		var attackLevel;
+		var defenseLevel;
+		//want to be between .85 and 1.15
+		var rand = Math.floor((Math.random()*(115-85))+85)/100;
+		var damageOutput;
 		var curPokemon;
+		var atkCurStage;
+		var defCurStage;
 
 		if (user == 'player') {
 			curPokemon = playerPokemon;
-			base = pokemon[curPokemon].moveSet[move].power;
-			stabLevel = pokemon[curPokemon].moveSet[move].stab;
+			targetPokemon = enemyPokemon;
 			level = playerLevel;
-			critical = 1; //implement later
-			typeBonus = determineTypeBonus ( pokemon[curPokemon].moveSet[move].type ,  pokemon[enemyPokemon].type);
+			atkCurStage = statStageCalc(playerAttackStage);
+			defCurStage = statStageCalc(enemyDefenseStage);
+		}
 
-			if (pokemon[curPokemon].moveSet[move].special) {
-				attackLevel = pokemon[curPokemon].special;
-				defenseLevel = pokemon[enemyPokemon].specDef;
+		else {
+			curPokemon = enemyPokemon;
+			targetPokemon = playerPokemon;
+			level = 20;
+			atkCurStage = statStageCalc(enemyAttackStage);
+			defCurStage = statStageCalc(playerDefenseStage);
+		}
 
-			}
-			else {
-				attackLevel = pokemon[curPokemon].attack;
-				defenseLevel = pokemon[enemyPokemon].defense;
-			}
-			
+		base = pokemon[curPokemon].moveSet[move].power;
+		stabLevel = pokemon[curPokemon].moveSet[move].stab;
+		critical = 1; //implement later
+		typeBonus = determineTypeBonus ( pokemon[curPokemon].moveSet[move].type ,  pokemon[targetPokemon].type);
+
+		if (pokemon[curPokemon].moveSet[move].special) {
+			attackLevel = pokemon[curPokemon].special;
+			defenseLevel = pokemon[targetPokemon].specDef;
 
 		}
 
-		console.log( '( (2 * ' + level + '+ 10)/250)* (' + attackLevel +' /' + defenseLevel + ' ) * ( ' + base + '*' + stabLevel + '*' + typeBonus +'*' + critical + '* ' +rand +'));');
-		damageOutput = Math.floor(((2*level + 10)/250)* (attackLevel / defenseLevel) * (base*stabLevel*typeBonus*critical*rand));
-		console.log(curPokemon + ' hit you with ' + pokemon[curPokemon].moveSet[move].name + ' for ' + damageOutput);
+		else {
+			attackLevel = pokemon[curPokemon].attack;
+			defenseLevel = pokemon[targetPokemon].defense;
+		}
 
+		damageOutput = Math.floor(((2  *level + 10) / 250) * ((attackLevel * atkCurStage) / (defenseLevel * defCurStage)) * (base*stabLevel*typeBonus*critical*rand));
+			
+		if (user == 'player') {
+			enemyCurHP -= damageOutput;
+		}
 
+		else {
+			playerCurHP -= damageOutput;
+		}
+
+		hpBar();
+		// console.log( '( (2 * ' + level + '+ 10)/250)* (' + attackLevel +' /' + defenseLevel + ' ) * ( ' + base + '*' + stabLevel + '*' + typeBonus +'*' + critical + '* ' +rand +'));');
+		// damageOutput = Math.floor(((2*level + 10)/250)* (attackLevel / defenseLevel) * (base*stabLevel*typeBonus*critical*rand));
+		// console.log(curPokemon + ' hit you with ' + pokemon[curPokemon].moveSet[move].name + ' for ' + damageOutput);
+	}
+
+	function statStageCalc(stage) {
+		// only can lower with skills chosen, and below 6 is default to capture all cases quickly
+          switch (stage) {
+            case 0:
+            	return 1;
+            	break;
+            case -1:
+            	return .66;
+            	break;
+            case -2:
+            	return .5;
+            	break;
+            case -3:
+            	return .4;
+            	break;
+            case -4:
+            	return .33;
+            	break;
+            case -5:
+            	return .28;
+            	break;
+            default:
+            	return .25;
+            	break;
+            }
+
+         		/* only have lowering effects
+				-6 .25
+				-5 = .28
+				-4 = .33
+				-3 = .4
+				-2 = .5
+				-1 = .66
+				0 = 1
+
+			*/
 	}
 
 	//handles the debuff attacks
-	function debuffCalc() {
+	function debuffCalc(user,move) {
+
+		// var curPokemon;
+		var statHit;
+
+		if (user =='player') {
+			statHit = pokemon[playerPokemon].moveSet[move].stat
+		}
+		else {
+			statHit = pokemon[enemyPokemon].moveSet[move].stat
+
+		}
+
+		console.log("move:" +  move +" stat:" +statHit  );
+		// var stat = pokemon[curPokemon]
+
 		console.log('debuffed you');
 
+		if (user == 'player') {
+			if (statHit == 'attack'){
+				enemyAttackStage--;
+			}
+			else {
+				enemyDefenseStage--;
+			}
+		}
+
+		else {
+			if (statHit == 'attack') {
+				playerAttackStage--;
+			}
+			else {
+				playerDefenseStage--;
+			}
+		
+		}
+		console.log(enemyAttackStage + ' ' + enemyDefenseStage);
 	}
 
 	function determineTypeBonus(target, defender ) {
@@ -483,22 +562,24 @@ $(document).ready(function() {
 		var movePicked = pokemon[playerPokemon].moveSet[0];
 
 		if(movePicked.attack) {
-						attackCalc('player', 0);
-					}
-				else {
-						debuffCalc('player', 0);
-					}
+			attackCalc('player', 0);
+		}
+		else {
+			debuffCalc('player', 0);
+		}
+		enemyMove();
 	});
 
 	$("body").on("click","#attack2",function(){
 		var movePicked = pokemon[playerPokemon].moveSet[1];
 		
 		if(movePicked.attack) {
-						attackCalc('player', 1);
-					}
-				else {
-						debuffCalc('player', 1);
-					}
+			attackCalc('player', 1);
+		}
+		else {
+			debuffCalc('player', 1);
+		}
+		enemyMove();
 	});
 
 	$("body").on("click","#attack3",function(){
@@ -506,11 +587,12 @@ $(document).ready(function() {
 				var movePicked = pokemon[playerPokemon].moveSet[2];
 		
 		if(movePicked.attack) {
-						attackCalc('player', 2);
-					}
-				else {
-						debuffCalc('player', 2);
-					}
+			attackCalc('player', 2);
+		}
+		else {
+			debuffCalc('player', 2);
+		}
+		enemyMove();
 	});
 
 	$("body").on("click","#attack4",function(){
@@ -518,13 +600,26 @@ $(document).ready(function() {
 		var movePicked = pokemon[playerPokemon].moveSet[3];
 		
 		if(movePicked.attack) {
-						attackCalc('player', 3);
-					}
-				else {
-						debuffCalc('player', 3);
-					}
+			attackCalc('player', 3);
+		}
+		else {
+			debuffCalc('player', 3);
+		}
+		enemyMove();
+
 	});
 
+	function enemyMove(){
+		var enemyAttackNum = Math.floor(Math.random()*4);
+		var enemyAttack = pokemon[enemyPokemon].moveSet[enemyAttackNum];
+		console.log('The enemy used ' + enemyAttack.name)
+		if(enemyAttack.attack) {
+			attackCalc('enemy', enemyAttackNum);
+		}
+		else {
+			debuffCalc('enemy', enemyAttackNum);
+		}
+	}
 
 
 	//displays moves available to user
@@ -535,10 +630,12 @@ $(document).ready(function() {
 		var image2 = $("<img>");
 		image.attr("src","assets/images/enemyHP.png");
 		image.attr("id", "enemy-hp-box");
-		$("#selection-box").append(image);
 		image2.attr("src","assets/images/playerHP.png");
 		image2.attr("id", "player-hp-box");
+		$("#selection-box").append(image);
 		$("#selection-box").append(image2);
+
+		hpBar();
 
 
 		var attack1 = '<div class="row"><button type="button" class="btn btn-default attack-but" id="attack1">' + pokemon[playerPokemon].moveSet[0].name +'</button> </div>';
@@ -563,7 +660,51 @@ $(document).ready(function() {
 		$("#text-display").append(attack3);
 		$("#text-display").append(attack4);
 	}
+	//curentHP, maxHP, user	
+	function hpBar () {
+	  	var progDiv1 = $('<div>');
+	    progDiv1.attr("class","progress");
+	    var progDiv2 = $('<div>');
+	    progDiv2.attr("class","progress");
 
+	    // var currentHP = playerCurHP;
+	    // var maxHP = playerMaxHP;
+	    // var progInterior = $("<div>");
+	    // var progInterior.attr("class", "progress-bar")
+	 
+	    var playerHpPercent = Math.floor( playerCurHP/playerMaxHP * 100 );
+	    var enemyHpPercent = Math.floor( enemyCurHP/enemyMaxHP * 100 );
+
+
+
+	    if (enemyHpPercent > 50) {
+	      progDiv1.html('<div class="progress-bar progress-bar-success" style="width:' + enemyHpPercent +'%"><span class="sr-only"></span></div>');
+
+	    }
+	    else if(enemyHpPercent > 20) {
+	       progDiv1.html('<div class="progress-bar progress-bar-warning" style="width:' + enemyHpPercent +'%"><span class="sr-only"></span></div>');
+	    }
+
+	    else if(enemyHpPercent > 0) {
+	      progDiv1.html('<div class="progress-bar progress-bar-danger" style="width:' + enemyHpPercent +'%"><span class="sr-only"></span></div>');     
+	    }
+	    $("#enemy-hp-bar").html(progDiv1);
+
+
+	    if (playerHpPercent > 50) {
+	      progDiv2.html('<div class="progress-bar progress-bar-success" style="width:' + playerHpPercent +'%"><span class="sr-only"></span></div>');
+
+	    }
+	    else if(playerHpPercent > 20) {
+	       progDiv2.html('<div class="progress-bar progress-bar-warning" style="width:' + playerHpPercent +'%"><span class="sr-only"></span></div>');
+	    }
+
+	    else if(playerHpPercent > 0) {
+	      progDiv2.html('<div class="progress-bar progress-bar-danger" style="width:' + playerHpPercent +'%"><span class="sr-only"></span></div>');     
+	    }
+
+	 	$("#player-hp-bar").html(progDiv2);
+	  }
 	//typewriter effect code
 	function typeWords(words) {
 
@@ -587,3 +728,11 @@ $(document).ready(function() {
      }
 
 	});
+
+
+
+
+
+
+
+

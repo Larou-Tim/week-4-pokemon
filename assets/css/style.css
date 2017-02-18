@@ -30,6 +30,22 @@
   height: 75px;
 }
 
+#enemy-hp-bar {
+  position: absolute;
+  left:60px;
+  top: 50px;
+  width: 100px;
+  height: 10px;
+}
+
+#player-hp-bar {
+  position: absolute;
+  right:45px;
+  bottom: 80px;
+  width: 100px;
+  height: 10px;
+}
+
 #icon-spot{
   position: absolute;
   bottom: 5px;
