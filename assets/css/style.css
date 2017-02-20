@@ -30,6 +30,13 @@
   height: 75px;
 }
 
+#hp-display {
+  position: absolute;
+  right: 50px;
+  bottom: 40px;
+
+}
+
 #enemy-hp-bar {
   position: absolute;
   left:60px;

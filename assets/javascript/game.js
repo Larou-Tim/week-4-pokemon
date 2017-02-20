@@ -17,6 +17,18 @@ $(document).ready(function() {
 	// 6. next player 
 	// if player wins he gets +1 level - will figure out stat  boost
 
+
+
+	/* todolist
+		speed turn order
+		accuracy
+		critical
+		winnerHandler
+		next enemy
+		re
+
+	*/
+
 	var gameStart = true;
 	var battleStart = false;
 	var profOak = '<img src="assets/images/oak.png" alt="Professor Oak" id="prof-oak">'; 
@@ -32,6 +44,9 @@ $(document).ready(function() {
 	var playerCurHP;
 	var enemyCurHP ;
 	var enemyMaxHP ;
+	var levelUp = false;
+	var playerSeeded = false;
+	var enemySeeded = false;
 
 	// pokemon choices and all relevant info 
 	var pokemon = {
@@ -231,8 +246,9 @@ $(document).ready(function() {
 					name:"Leech Seed",
 					accuracy: .9,
 					stab: 1.5,
-					attack: true,
-					type: 'grass'
+					attack: false,
+					type: 'grass',
+					stat: 'seed'
 				}
 			],
 		}
@@ -296,29 +312,10 @@ $(document).ready(function() {
 		playerCurHP = playerMaxHP;
 		enemyMaxHP = pokemon[enemyPokemon].hp;
 		enemyCurHP = enemyMaxHP;
+		enemySeeded = false;
+		playerSeeded = false;
 
 	}
-
-	// $(".char-select").on("click", function() {
-	// 	// characterSelect("squirtle");
-	// 	console.log($(this).attr('id'));
-	// 	console.log('xxx');
-	// });
-
-	// function startBattle (selectedEnemy) {
-	// 	$("#image-box").append( '<img src="' + pokemon[selectedEnemy].picture +'" alt="" id="enemy">');
-		
-	// }
-
-	// ***** these words are not being typed
-	//handles who player selected 
-	// function characterSelect(selected) {
-	// 	$("#image-box").empty();
-	// 	$("#text-display").stop();
-	// 	$("#text-display").empty();
-
-	// 	typeWords("You have selected " + selected + ", good choice! Who would you like to battle first?");
-	// }
 
 	//handles the display of non defeated enemy pokemon and asks who to battle
 	function playerAdd(playerChacter) {
@@ -326,7 +323,13 @@ $(document).ready(function() {
 
 		$("#image-box").append( '<img src="' + pokemon[playerChacter].pictureBack  +'" alt="" id="player">');
 		playerPokemon = playerChacter;
+		if (levelUp) {
+			playerLevel += 5;
+			// playerMaxHP += 15;
+			pokemon[playerPokemon].hp += 15;
+		}
 
+		console.log("was squrittle beat " + pokemon.squirtle.defeated);
 
 		if (!pokemon.pikachu.defeated && playerChacter != "pikachu" ) {
 			$("#selection-box").append( '<img src="' + pokemon.pikachu.picture +'" alt="" class="enemey-select" id="pikachu">');
@@ -466,14 +469,18 @@ $(document).ready(function() {
 		console.log("move:" +  move +" stat:" +statHit  );
 		// var stat = pokemon[curPokemon]
 
-		console.log('debuffed you');
+		// console.log('debuffed you');
 
 		if (user == 'player') {
 			if (statHit == 'attack'){
 				enemyAttackStage--;
 			}
-			else {
+			else if (statHit == 'defense') {
 				enemyDefenseStage--;
+			}
+			else if (statHit == 'seed') {
+				enemySeeded = true;
+				leechSeed();
 			}
 		}
 
@@ -481,12 +488,34 @@ $(document).ready(function() {
 			if (statHit == 'attack') {
 				playerAttackStage--;
 			}
-			else {
+			else  if (statHit == 'defense') {
 				playerDefenseStage--;
+			}
+			else if (statHit == 'seed') {
+				playerSeeded = true;
+				leechSeed();
 			}
 		
 		}
 		console.log(enemyAttackStage + ' ' + enemyDefenseStage);
+	}
+
+	function leechSeed () {
+		var seedAmount ;
+
+		if (playerSeeded) {
+			seedAmount = Math.ceil(playerCurHP/16);
+			playerCurHP -= seedAmount;
+			enemyCurHP += seedAmount;
+		}
+
+		if (enemySeeded) {
+			seedAmount = Math.ceil(enemyCurHP/16);
+			enemyCurHP -= seedAmount;
+			playerCurHP += seedAmount;
+
+		}
+		console.log("seeded " + seedAmount);
 	}
 
 	function determineTypeBonus(target, defender ) {
@@ -516,96 +545,86 @@ $(document).ready(function() {
 
 	}
 
-	// $("body").on("click", ".attack-but", function(){
-	// 	var movePicked;
+	function turnHandler(movePicked) {
 
-	// 	if( this.id = "attack1") {
-	// 		movePicked = pokemon[playerPokemon].moveSet[0];
+		var move = pokemon[playerPokemon].moveSet[movePicked];
 
+		var playerSpeed = pokemon[playerPokemon].speed;
+		var enemySpeed = pokemon[enemyPokemon].speed;
 
+		if (playerSpeed >= enemySpeed) {
+			console.log(pokemon[playerPokemon].name + ' strikes first');
+			leechSeed();
+			if(move.attack) {
+				attackCalc('player', movePicked);
+				}
+			else {
+				debuffCalc('player', movePicked);
+			}
+			
+			hpCheck('enemy');
 
-	// 	}
+			enemyMove();
+			hpCheck('player');
+		} 
 
-	// 	else if ( this.id = "attack2") {
-	// 		movePicked = pokemon[playerPokemon].moveSet[1];
-
-
-	// 	}
-	// 	else if ( this.id = "attack3") {
-	// 		movePicked =pokemon[playerPokemon].moveSet[2];
-
-
-	// 	}
-	// 	else if ( this.id = "attack4") {
-	// 		movePicked = pokemon[playerPokemon].moveSet[3];
-
-
-	// 	}
-	// 	// console.log(movePicked);
-	// 	// console.log(this.id);
-
-	// 	if(movePicked.attack) {
-	// 			attackCalc();
-	// 		}
-	// 	else {
-	// 			debuffCalc();
-	// 		}
+		else {
+			console.log(pokemon[enemyPokemon].name + ' strikes first');
+			leechSeed();
+			enemyMove();
+			hpCheck('player');
 
 
-	// });
+			if(move.attack) {
+				attackCalc('player', movePicked);
+				}
+			else {
+				debuffCalc('player', movePicked);
+			}
+			hpCheck('enemy');
+		}
+	}
 
+
+	function hpCheck(user) {
+		if (user == 'player') {
+			if (playerCurHP <= 0 ) {
+				console.log('You ded');
+				playerAdd(playerPokemon); /// if you ded this is gamer 
+			}
+		}
+		else {
+			if (enemyCurHP <= 0 ) {
+				console.log('He ded');
+				pokemon[enemyPokemon].defeated = true;
+				levelUp = true;
+				playerAdd(playerPokemon); // you win
+				
+				return;
+			}
+		}
+	}
 	//each button handles attack click, couldn't use class and onclick, as it would only register first button
 	
 	$("body").on("click","#attack1",function(){
 		// console.log(this.id);
 
-		var movePicked = pokemon[playerPokemon].moveSet[0];
-
-		if(movePicked.attack) {
-			attackCalc('player', 0);
-		}
-		else {
-			debuffCalc('player', 0);
-		}
-		enemyMove();
+		// var movePicked = pokemon[playerPokemon].moveSet[0];
+		turnHandler(0);
+	
 	});
 
 	$("body").on("click","#attack2",function(){
-		var movePicked = pokemon[playerPokemon].moveSet[1];
-		
-		if(movePicked.attack) {
-			attackCalc('player', 1);
-		}
-		else {
-			debuffCalc('player', 1);
-		}
-		enemyMove();
+		turnHandler(1);
 	});
 
 	$("body").on("click","#attack3",function(){
-		// console.log(this.id);
-				var movePicked = pokemon[playerPokemon].moveSet[2];
-		
-		if(movePicked.attack) {
-			attackCalc('player', 2);
-		}
-		else {
-			debuffCalc('player', 2);
-		}
-		enemyMove();
+		turnHandler(2);
 	});
 
 	$("body").on("click","#attack4",function(){
 		// console.log(this.id);		
-		var movePicked = pokemon[playerPokemon].moveSet[3];
-		
-		if(movePicked.attack) {
-			attackCalc('player', 3);
-		}
-		else {
-			debuffCalc('player', 3);
-		}
-		enemyMove();
+		turnHandler(3);
 
 	});
 
@@ -620,7 +639,6 @@ $(document).ready(function() {
 			debuffCalc('enemy', enemyAttackNum);
 		}
 	}
-
 
 	//displays moves available to user
 	function playerAttackSelect() {
@@ -666,6 +684,9 @@ $(document).ready(function() {
 	    progDiv1.attr("class","progress");
 	    var progDiv2 = $('<div>');
 	    progDiv2.attr("class","progress");
+	    // var hpDisplay = $('<span>');
+	    // hpDisplay.html()
+	    $("#hp-display").html('<span">' + playerCurHP + '/' + playerMaxHP + "</span>");
 
 	    // var currentHP = playerCurHP;
 	    // var maxHP = playerMaxHP;
