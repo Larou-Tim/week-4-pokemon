@@ -237,7 +237,6 @@ $(document).ready(function() {
 
 	//handles when there is no buttons on the screen (first screen and after an enemy is selected)
 	$("body").on("click", function(){
-		console.log(battleStart);
 		if (gameStart) {
 			$("#image-box").empty();
 			$("#text-display").stop();
@@ -299,6 +298,10 @@ $(document).ready(function() {
 		if (levelUp) {
 			playerLevel += 5;
 			pokemon[playerPokemon].hp += 15;
+		}
+
+		if (playerPokemon == 'pikachu') {
+			// $('body').css('background-image', 'url("/assets/images/background4.jpg")');
 		}
 
 		if (!pokemon.pikachu.defeated && playerChacter != "pikachu" ) {
@@ -488,7 +491,6 @@ $(document).ready(function() {
 		}
 
 		if (enemySeeded) {
-			console.log('im hitting him')
 			seedAmount = Math.ceil(enemyCurHP/16);
 			enemyCurHP -= seedAmount;
 			playerCurHP += seedAmount;
@@ -565,7 +567,6 @@ $(document).ready(function() {
 			}
 			
 			targetFaint = hpCheck('enemy');
-			console.log ("target faint is " + targetFaint);
 			stringHolder += "<br /> <br />" ;
 			if (!targetFaint) {
 				enemyMove();
@@ -579,7 +580,6 @@ $(document).ready(function() {
 			enemyMove();
 			stringHolder += "<br /> <br />" ;
 			targetFaint = hpCheck('player');
-			console.log ("target faint is " + targetFaint);
 			if (!targetFaint) {
 				if(move.attack) {
 					attackCalc('player', movePicked);
@@ -598,7 +598,6 @@ $(document).ready(function() {
 	function hpCheck(user) {
 		if (user == 'player') {
 			if (playerCurHP <= 0 ) {
-				console.log('You ded');
 				stringHolder += "<br />" + pokemon[playerPokemon].name + " fainted."
 				playerAdd(playerPokemon); /// if you ded this is gamer 
 				return true;
@@ -607,7 +606,6 @@ $(document).ready(function() {
 		}
 		else {
 			if (enemyCurHP <= 0 ) {
-				console.log('He ded');
 				stringHolder += "<br /> Enemy " + pokemon[enemyPokemon].name + " fainted."
 				pokemon[enemyPokemon].defeated = true;
 				levelUp = true;
@@ -638,7 +636,6 @@ $(document).ready(function() {
 	function enemyMove(){
 		var enemyAttackNum = Math.floor(Math.random()*4);
 		var enemyAttack = pokemon[enemyPokemon].moveSet[enemyAttackNum];
-		console.log('The enemy used ' + enemyAttack.name)
 		if(enemyAttack.attack) {
 			attackCalc('enemy', enemyAttackNum);
 		}
