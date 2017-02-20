@@ -442,15 +442,18 @@ $(document).ready(function() {
 			statHit = pokemon[enemyPokemon].moveSet[move].stat
 			curPokemon = enemyPokemon;
 		}
+		stringHolder += pokemon[curPokemon].name + " used " + pokemon[curPokemon].moveSet[move].name + ". ";
 
-		// console.log("move:" +  move +" stat:" +statHit  );
+		
 
 		if (user == 'player') {
 			if (statHit == 'attack'){
 				enemyAttackStage--;
+				stringHolder += pokemon[enemyPokemon].name + "'s attack fell. "
 			}
 			else if (statHit == 'defense') {
 				enemyDefenseStage--;
+				stringHolder += pokemon[enemyPokemon].name + "'s defense fell. "
 			}
 			else if (statHit == 'seed') {
 				enemySeeded = true;
@@ -461,19 +464,17 @@ $(document).ready(function() {
 		else {
 			if (statHit == 'attack') {
 				playerAttackStage--;
+				stringHolder += pokemon[playerPokemon].name + "'s attack fell. "
 			}
 			else  if (statHit == 'defense') {
 				playerDefenseStage--;
+				stringHolder += pokemon[playerPokemon].name + "'s defense fell. "
 			}
 			else if (statHit == 'seed') {
 				playerSeeded = true;
 				leechSeed();
 			}
 		}
-		console.log(enemyAttackStage + ' ' + enemyDefenseStage);
-	
-
-		stringHolder += pokemon[curPokemon].name + " used " + pokemon[curPokemon].moveSet[move].name + ". ";
 	}
 
 	function leechSeed () {
