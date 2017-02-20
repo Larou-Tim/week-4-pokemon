@@ -301,7 +301,16 @@ $(document).ready(function() {
 		}
 
 		if (playerPokemon == 'pikachu') {
-			// $('body').css('background-image', 'url("/assets/images/background4.jpg")');
+			$('body').css('background-image', 'url("./assets/images/background2.jpg")');
+		}
+		else if (playerPokemon == 'squirtle') {
+			$('body').css('background-image', 'url("./assets/images/background-squr.jpg")');
+		}
+		else if (playerPokemon == 'charmander') {
+			$('body').css('background-image', 'url("./assets/images/background-charm.jpg")');
+		}
+		else if (playerPokemon == 'bulbasaur') {
+			$('body').css('background-image', 'url("./assets/images/background-bulb.jpg")');
 		}
 
 		if (!pokemon.pikachu.defeated && playerChacter != "pikachu" ) {
@@ -496,6 +505,14 @@ $(document).ready(function() {
 			playerCurHP += seedAmount;
 			stringHolder += "Leech Seed saps enemy " + pokemon[enemyPokemon].name + ". <br />";
 
+		}
+
+		if (enemyCurHP > enemyMaxHP) {
+			enemyCurHP = enemyMaxHP;
+		}
+
+		if (playerCurHP > playerMaxHP) {
+			playerCurHP = playerMaxHP;
 		}
 
 		// console.log(seededPokemon);
