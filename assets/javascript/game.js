@@ -1,32 +1,11 @@
 $(document).ready(function() {
 
-	// stat increase moves
-	// accuracy
-
-	// 1. speed determines order unless quick attack - note pikachu is fastest so will always go first
-	// 2. player picks attack / computer picks attack
-		// computer will pick random 1/4 will not do ai logic trees
-	// 3. check if attack hits, random number from 1-100 if rnd is greater attack misses
-	// 4. calculate attack damage
-		// will find formula
-		//stat stage
-		// need to use attack/special 
-		// move type vs pokemon type
-	// 5. remove damage from HP
-		// if hp <= 0 pokeman is defeated
-	// 6. next player 
-	// if player wins he gets +1 level - will figure out stat  boost
-
-
-
 	/* todolist
-		speed turn order
 		accuracy
 		critical
 		winnerHandler
-		next enemy
-		re
-
+		words for actions
+		restart
 	*/
 
 	var gameStart = true;
@@ -48,6 +27,7 @@ $(document).ready(function() {
 	var playerSeeded = false;
 	var enemySeeded = false;
 
+	var stringHolder;
 	// pokemon choices and all relevant info 
 	var pokemon = {
 		pikachu: {
@@ -74,17 +54,13 @@ $(document).ready(function() {
 				{
 						//lowers def
 					name: "Tail Whip",
-					// power: 35,
 					accuracy: 1,
 					attack: false,
 					stat: 'defense'
-					// type: 1.5,
 				},
 				{
 						// decreases attack
 					name: "Growl",
-					// power: 20,
-					// type: 1.5,
 					accuracy: 1,
 					stat: 'attack',
 					attack: false
@@ -197,7 +173,7 @@ $(document).ready(function() {
 					name:"Leer",
 					stat: 'defense',
 					accuracy: .9,
-					attack: true
+					attack: false
 				}
 
 			],
@@ -275,8 +251,6 @@ $(document).ready(function() {
 		}
 		else if (battleStart) {
 			playerAttackSelect();
-			 // typeWords(" ");
-			// console.log("moves");
 		}
 
 
@@ -286,9 +260,6 @@ $(document).ready(function() {
 	$("body").on("click", ".char-select", function(){
 
   		var selectedChar = $(this).attr('id');
-  		// console.log('xxx');
-
-  		// pokemon[selectedChar].addPlayer();
   		playerAdd(selectedChar);
 	});
 
@@ -296,15 +267,13 @@ $(document).ready(function() {
 	$("body").on("click", ".enemey-select", function(){
 
   		var selectedChar = $(this).attr('id');
-  		// console.log(selectedChar);
   		$("#selection-box").empty();
+  
   		$("#selection-box").append( '<img src="' + pokemon[selectedChar].picture +'" alt="" class="battle-target" id="' + selectedChar + '">');
   		typeWords("You chose to battle " + pokemon[selectedChar].name + ". Good luck!")
   		enemyPokemon = selectedChar;
   		battleStart = true;
-
   		addStats();
-  		// startBattle(selectedChar);
 	});
 
 	function addStats() {
@@ -320,16 +289,17 @@ $(document).ready(function() {
 	//handles the display of non defeated enemy pokemon and asks who to battle
 	function playerAdd(playerChacter) {
 		$("#selection-box").empty();
+		$("#hp-display").html("");
+  		$("#player-hp-bar").empty();
+
+  		$("#enemy-hp-bar").empty();
 
 		$("#image-box").append( '<img src="' + pokemon[playerChacter].pictureBack  +'" alt="" id="player">');
 		playerPokemon = playerChacter;
 		if (levelUp) {
 			playerLevel += 5;
-			// playerMaxHP += 15;
 			pokemon[playerPokemon].hp += 15;
 		}
-
-		console.log("was squrittle beat " + pokemon.squirtle.defeated);
 
 		if (!pokemon.pikachu.defeated && playerChacter != "pikachu" ) {
 			$("#selection-box").append( '<img src="' + pokemon.pikachu.picture +'" alt="" class="enemey-select" id="pikachu">');
@@ -345,8 +315,7 @@ $(document).ready(function() {
 			$("#selection-box").append( '<img src="' + pokemon.squirtle.picture +'" alt="" class="enemey-select" id="squirtle">');
 		}
 
-
-			typeWords("Who would you like to battle?");
+		typeWords("Who would you like to battle?");
 	}
 
 	// handles damage dealing attacks
@@ -384,7 +353,7 @@ $(document).ready(function() {
 
 		base = pokemon[curPokemon].moveSet[move].power;
 		stabLevel = pokemon[curPokemon].moveSet[move].stab;
-		critical = 1; //implement later
+		critical = 1; //implement later maybe
 		typeBonus = determineTypeBonus ( pokemon[curPokemon].moveSet[move].type ,  pokemon[targetPokemon].type);
 
 		if (pokemon[curPokemon].moveSet[move].special) {
@@ -398,7 +367,7 @@ $(document).ready(function() {
 			defenseLevel = pokemon[targetPokemon].defense;
 		}
 
-		damageOutput = Math.floor(((2  *level + 10) / 250) * ((attackLevel * atkCurStage) / (defenseLevel * defCurStage)) * (base*stabLevel*typeBonus*critical*rand));
+		damageOutput = Math.floor(((2  * level + 10) / 250) * ((attackLevel * atkCurStage) / (defenseLevel * defCurStage)) * (base*stabLevel*typeBonus*critical*rand));
 			
 		if (user == 'player') {
 			enemyCurHP -= damageOutput;
@@ -408,7 +377,15 @@ $(document).ready(function() {
 			playerCurHP -= damageOutput;
 		}
 
-		hpBar();
+		stringHolder += pokemon[curPokemon].name + " used " + pokemon[curPokemon].moveSet[move].name + ". ";
+		if (typeBonus == 2) {
+			stringHolder += "It was super effective. ";
+		}
+		else if (typeBonus == .5) {
+			stringHolder += "It was not very effective. ";
+		}
+
+		setTimeout(function(){hpBar();}, 4000);
 		// console.log( '( (2 * ' + level + '+ 10)/250)* (' + attackLevel +' /' + defenseLevel + ' ) * ( ' + base + '*' + stabLevel + '*' + typeBonus +'*' + critical + '* ' +rand +'));');
 		// damageOutput = Math.floor(((2*level + 10)/250)* (attackLevel / defenseLevel) * (base*stabLevel*typeBonus*critical*rand));
 		// console.log(curPokemon + ' hit you with ' + pokemon[curPokemon].moveSet[move].name + ' for ' + damageOutput);
@@ -454,22 +431,19 @@ $(document).ready(function() {
 
 	//handles the debuff attacks
 	function debuffCalc(user,move) {
-
-		// var curPokemon;
 		var statHit;
+		var curPokemon;
 
 		if (user =='player') {
 			statHit = pokemon[playerPokemon].moveSet[move].stat
+			curPokemon = playerPokemon;
 		}
 		else {
 			statHit = pokemon[enemyPokemon].moveSet[move].stat
-
+			curPokemon = enemyPokemon;
 		}
 
-		console.log("move:" +  move +" stat:" +statHit  );
-		// var stat = pokemon[curPokemon]
-
-		// console.log('debuffed you');
+		// console.log("move:" +  move +" stat:" +statHit  );
 
 		if (user == 'player') {
 			if (statHit == 'attack'){
@@ -495,9 +469,11 @@ $(document).ready(function() {
 				playerSeeded = true;
 				leechSeed();
 			}
-		
 		}
 		console.log(enemyAttackStage + ' ' + enemyDefenseStage);
+	
+
+		stringHolder += pokemon[curPokemon].name + " used " + pokemon[curPokemon].moveSet[move].name + ". ";
 	}
 
 	function leechSeed () {
@@ -520,21 +496,39 @@ $(document).ready(function() {
 
 	function determineTypeBonus(target, defender ) {
 		if(target == 'electric' && defender == 'water') {
-			console.log('super effective');
+			
 			return 2;
-
 		}
 		else if (target == 'water' && defender == 'fire') {
-			console.log('super effective');
+			
 			return 2;
 		}
 		else if (target == 'fire' && defender == 'grass') {
-			console.log('super effective');
+			
 			return 2;
 		}
-		else if (target == 'grass' && defender == 'electric') {
-			console.log('super effective');
+		else if (target == 'grass' && defender == 'water') {
+		
 			return 2;
+		}
+
+		else if (target == 'fire' && defender == 'water') {
+			
+			return .5;
+		}
+
+		else if (target == 'water' && defender == 'grass') {
+			
+			return .5;
+		}
+
+		else if (target == 'electric' && defender == 'grass') {
+			
+			return .5;
+		}
+		else if (target == 'grass' && defender == 'fire') {
+			
+			return .5;
 		}
 
 
@@ -546,43 +540,51 @@ $(document).ready(function() {
 	}
 
 	function turnHandler(movePicked) {
-
 		var move = pokemon[playerPokemon].moveSet[movePicked];
-
 		var playerSpeed = pokemon[playerPokemon].speed;
 		var enemySpeed = pokemon[enemyPokemon].speed;
+		var targetFaint = false;
+
+		stringHolder = "";
 
 		if (playerSpeed >= enemySpeed) {
-			console.log(pokemon[playerPokemon].name + ' strikes first');
+			// console.log(pokemon[playerPokemon].name + ' strikes first');
 			leechSeed();
 			if(move.attack) {
 				attackCalc('player', movePicked);
-				}
+			}
 			else {
 				debuffCalc('player', movePicked);
 			}
 			
-			hpCheck('enemy');
-
-			enemyMove();
-			hpCheck('player');
+			targetFaint = hpCheck('enemy');
+			console.log ("target faint is " + targetFaint);
+			stringHolder += "<br /> <br />" ;
+			if (!targetFaint) {
+				enemyMove();
+				hpCheck('player');
+			}
 		} 
 
 		else {
-			console.log(pokemon[enemyPokemon].name + ' strikes first');
+			// console.log(pokemon[enemyPokemon].name + ' strikes first');
 			leechSeed();
 			enemyMove();
-			hpCheck('player');
-
-
-			if(move.attack) {
-				attackCalc('player', movePicked);
+			tringHolder += "<br /> <br />" ;
+			targetFaint = hpCheck('player');
+			console.log ("target faint is " + targetFaint);
+			if (!targetFaint) {
+				if(move.attack) {
+					attackCalc('player', movePicked);
 				}
-			else {
-				debuffCalc('player', movePicked);
+				else {
+					debuffCalc('player', movePicked);
+				}
+				hpCheck('enemy');
 			}
-			hpCheck('enemy');
 		}
+
+	typeWords(stringHolder);
 	}
 
 
@@ -590,28 +592,28 @@ $(document).ready(function() {
 		if (user == 'player') {
 			if (playerCurHP <= 0 ) {
 				console.log('You ded');
+				stringHolder += "<br />" + pokemon[playerPokemon].name + " fainted."
 				playerAdd(playerPokemon); /// if you ded this is gamer 
+				return true;
 			}
+			else {return false;}
 		}
 		else {
 			if (enemyCurHP <= 0 ) {
 				console.log('He ded');
+				stringHolder += "<br /> Enemy " + pokemon[enemyPokemon].name + " fainted."
 				pokemon[enemyPokemon].defeated = true;
 				levelUp = true;
 				playerAdd(playerPokemon); // you win
-				
-				return;
+				return true;
 			}
+			else {return false;}
 		}
 	}
 	//each button handles attack click, couldn't use class and onclick, as it would only register first button
 	
 	$("body").on("click","#attack1",function(){
-		// console.log(this.id);
-
-		// var movePicked = pokemon[playerPokemon].moveSet[0];
-		turnHandler(0);
-	
+		turnHandler(0);	
 	});
 
 	$("body").on("click","#attack2",function(){
@@ -622,10 +624,8 @@ $(document).ready(function() {
 		turnHandler(2);
 	});
 
-	$("body").on("click","#attack4",function(){
-		// console.log(this.id);		
+	$("body").on("click","#attack4",function(){	
 		turnHandler(3);
-
 	});
 
 	function enemyMove(){
@@ -642,10 +642,11 @@ $(document).ready(function() {
 
 	//displays moves available to user
 	function playerAttackSelect() {
-		// typeWords(" ");
-		// $("#icon-spot").html("");
 		var image = $("<img>");
 		var image2 = $("<img>");
+		var enemyPokemonName = $("<h5>");
+		var playerPokemonName = $("<h5>");
+
 		image.attr("src","assets/images/enemyHP.png");
 		image.attr("id", "enemy-hp-box");
 		image2.attr("src","assets/images/playerHP.png");
@@ -653,19 +654,15 @@ $(document).ready(function() {
 		$("#selection-box").append(image);
 		$("#selection-box").append(image2);
 
+		enemyPokemonName.html(pokemon[enemyPokemon].name);
+		playerPokemonName.html(pokemon[playerPokemon].name);
+		enemyPokemonName.attr("id", "enemy-pokemon-name");
+		playerPokemonName.attr("id", "player-pokemon-name");
+		$("#selection-box").append(enemyPokemonName);
+		$("#selection-box").append(playerPokemonName);
+
+
 		hpBar();
-
-
-		var attack1 = '<div class="row"><button type="button" class="btn btn-default attack-but" id="attack1">' + pokemon[playerPokemon].moveSet[0].name +'</button> </div>';
-		var attack2 = '<div class="row"><button type="button" class="btn btn-default attack-but" id="attack2">' + pokemon[playerPokemon].moveSet[1].name +'</button> </div>';
-		var attack3 = '<div class="row"><button type="button" class="btn btn-default attack-but" id="attack3">' + pokemon[playerPokemon].moveSet[2].name +'</button> </div>';
-		var attack4 = '<div class="row"><button type="button" class="btn btn-default attack-but" id="attack4">' + pokemon[playerPokemon].moveSet[3].name +'</button> </div>';
-
-		$("#text-display").empty();
-		$("#text-display").append(attack1);
-		$("#text-display").append(attack2);
-		$("#text-display").append(attack3);
-		$("#text-display").append(attack4);
 
 		var attack1 = '<div class="row"><button type="button" class="btn btn-default attack-but" id="attack1">' + pokemon[playerPokemon].moveSet[0].name +'</button> </div>';
 		var attack2 = '<div class="row"><button type="button" class="btn btn-default attack-but" id="attack2">' + pokemon[playerPokemon].moveSet[1].name +'</button> </div>';
@@ -684,19 +681,9 @@ $(document).ready(function() {
 	    progDiv1.attr("class","progress");
 	    var progDiv2 = $('<div>');
 	    progDiv2.attr("class","progress");
-	    // var hpDisplay = $('<span>');
-	    // hpDisplay.html()
 	    $("#hp-display").html('<span">' + playerCurHP + '/' + playerMaxHP + "</span>");
-
-	    // var currentHP = playerCurHP;
-	    // var maxHP = playerMaxHP;
-	    // var progInterior = $("<div>");
-	    // var progInterior.attr("class", "progress-bar")
-	 
 	    var playerHpPercent = Math.floor( playerCurHP/playerMaxHP * 100 );
 	    var enemyHpPercent = Math.floor( enemyCurHP/enemyMaxHP * 100 );
-
-
 
 	    if (enemyHpPercent > 50) {
 	      progDiv1.html('<div class="progress-bar progress-bar-success" style="width:' + enemyHpPercent +'%"><span class="sr-only"></span></div>');
@@ -710,7 +697,6 @@ $(document).ready(function() {
 	      progDiv1.html('<div class="progress-bar progress-bar-danger" style="width:' + enemyHpPercent +'%"><span class="sr-only"></span></div>');     
 	    }
 	    $("#enemy-hp-bar").html(progDiv1);
-
 
 	    if (playerHpPercent > 50) {
 	      progDiv2.html('<div class="progress-bar progress-bar-success" style="width:' + playerHpPercent +'%"><span class="sr-only"></span></div>');
@@ -728,21 +714,18 @@ $(document).ready(function() {
 	  }
 	//typewriter effect code
 	function typeWords(words) {
-
-	        $(function(){
-	          $("#text-display").typed({
-	            strings: [words],
-	            typeSpeed: 1
-	          });
-	        });
-	      
-	        $("#icon-spot").html(
-	          '<i class="glyphicon glyphicon-triangle-bottom" aria-hidden="true" id="blink-icon"></i>'
-	        );
-	          blink();
-	      
+        $(function(){
+          $("#text-display").typed({
+            strings: [words],
+            typeSpeed: 0
+          });
+        });
+      
+        $("#icon-spot").html(
+          '<i class="glyphicon glyphicon-triangle-bottom" aria-hidden="true" id="blink-icon"></i>'
+        );
+          blink();
   	}
-
   	//blinking for text icon
     function blink (){
     	$('#blink-icon').delay(200).fadeTo(200,0.0).delay(200).fadeTo(200,1, blink);
