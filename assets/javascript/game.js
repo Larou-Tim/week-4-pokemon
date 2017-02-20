@@ -478,20 +478,26 @@ $(document).ready(function() {
 
 	function leechSeed () {
 		var seedAmount ;
-
+		
 		if (playerSeeded) {
 			seedAmount = Math.ceil(playerCurHP/16);
 			playerCurHP -= seedAmount;
 			enemyCurHP += seedAmount;
+			stringHolder += "Leech Seed saps " + pokemon[playerPokemon].name + ". <br />";
 		}
 
 		if (enemySeeded) {
+			console.log('im hitting him')
 			seedAmount = Math.ceil(enemyCurHP/16);
 			enemyCurHP -= seedAmount;
 			playerCurHP += seedAmount;
+			stringHolder += "Leech Seed saps enemy " + pokemon[enemyPokemon].name + ". <br />";
 
 		}
-		console.log("seeded " + seedAmount);
+
+		// console.log(seededPokemon);
+
+		// stringHolder += "Leech Seed drained " + pokemon[seededPokemon].name + ". <br />";
 	}
 
 	function determineTypeBonus(target, defender ) {
@@ -570,7 +576,7 @@ $(document).ready(function() {
 			// console.log(pokemon[enemyPokemon].name + ' strikes first');
 			leechSeed();
 			enemyMove();
-			tringHolder += "<br /> <br />" ;
+			stringHolder += "<br /> <br />" ;
 			targetFaint = hpCheck('player');
 			console.log ("target faint is " + targetFaint);
 			if (!targetFaint) {
