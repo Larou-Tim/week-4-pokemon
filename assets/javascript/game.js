@@ -238,7 +238,7 @@ $(document).ready(function() {
 
 
 	//handles when there is no buttons on the screen (first screen and after an enemy is selected)
-	$("body").on("click", function(){
+	$("body").on("click touch", function(){
 		if (gameStart) {
 			$("#image-box").empty();
 			$("#text-display").stop();
@@ -777,6 +777,8 @@ $(document).ready(function() {
 
 
 	});
+
+//shorcut to be able to change stats that i might have changed above
 
 	var pokemonReset = {
 		pikachu: {
