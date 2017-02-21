@@ -644,7 +644,7 @@ $(document).ready(function() {
 		}
 		else {
 			if (enemyCurHP <= 0 ) {
-				stringHolder += "<br /> Enemy " + pokemon[enemyPokemon].name + " fainted. <br />" + pokemon[playerPokemon].name + " has leveled up! ";
+				stringHolder += "<br /> Enemy " + pokemon[enemyPokemon].name + " fainted. <br />" + pokemon[playerPokemon].name + " has leveled up! <br /> Please pick a new Pokemon to battle.";
 				winCount ++;
 				pokemon[enemyPokemon].defeated = true;
 				levelUp = true;
