@@ -3,9 +3,8 @@ $(document).ready(function() {
 	/* todolist
 		accuracy
 		critical
-		winnerHandler
-		words for actions
-		restart
+		
+		leech seed can go twice, but not worried about that bug
 	*/
 
 	var gameStart = true;
@@ -26,6 +25,9 @@ $(document).ready(function() {
 	var levelUp = false;
 	var playerSeeded = false;
 	var enemySeeded = false;
+	var gameOver = false;
+	var gameWin = false;
+	var winCount = 0;
 
 	var stringHolder;
 	// pokemon choices and all relevant info 
@@ -248,10 +250,29 @@ $(document).ready(function() {
 			typeWords("Here are your choices: Squitle, Bulbasaur, Charmander, or Pikachu");
 			gameStart = false;
 		}
+		else if(gameOver) {
+			typeWords("You have been defeated, please try again");
+			$("#selection-box").empty();
+			$("#enemy-hp-bar").empty();
+			$("#player-hp-bar").empty();
+			$("#hp-display").empty();
+			pokemon = pokemonReset;
+			gameStart = true;
+			gameOver = false;
+			playerLevel = 20;
+			winCount = 0;
+		}
+		else if (gameWin) {
+			typeWords("you have defeated all the pokemon, try again with a different pokemone!");
+			pokemon = pokemonReset;
+			gameStart = true;
+			gameWin = false;
+			playerLevel = 20;
+			winCount = 0;
+		}
 		else if (battleStart) {
 			playerAttackSelect();
 		}
-
 
 	});
 
@@ -267,6 +288,7 @@ $(document).ready(function() {
 
   		var selectedChar = $(this).attr('id');
   		$("#selection-box").empty();
+  		$("#hp-display").empty();
   
   		$("#selection-box").append( '<img src="' + pokemon[selectedChar].picture +'" alt="" class="battle-target" id="' + selectedChar + '">');
   		typeWords("You chose to battle " + pokemon[selectedChar].name + ". Good luck!")
@@ -287,18 +309,23 @@ $(document).ready(function() {
 
 	//handles the display of non defeated enemy pokemon and asks who to battle
 	function playerAdd(playerChacter) {
-		$("#selection-box").empty();
-		$("#hp-display").html("");
-  		$("#player-hp-bar").empty();
-
-  		$("#enemy-hp-bar").empty();
+			$("#selection-box").empty();
+			$("#enemy-hp-bar").empty();
+			$("#player-hp-bar").empty();
+			$("#hp-display").empty();
 
 		$("#image-box").append( '<img src="' + pokemon[playerChacter].pictureBack  +'" alt="" id="player">');
 		playerPokemon = playerChacter;
 		if (levelUp) {
 			playerLevel += 5;
 			pokemon[playerPokemon].hp += 15;
+			levelUp = false;
 		}
+
+		playerAttackStage = 0;
+		playerDefenseStage = 0;
+		enemyDefenseStage = 0;
+		enemyAttackStage = 0;
 
 		if (playerPokemon == 'pikachu') {
 			$('body').css('background-image', 'url("./assets/images/background2.jpg")');
@@ -326,8 +353,13 @@ $(document).ready(function() {
 		if (!pokemon.squirtle.defeated && playerChacter != "squirtle") {
 			$("#selection-box").append( '<img src="' + pokemon.squirtle.picture +'" alt="" class="enemey-select" id="squirtle">');
 		}
+		if (winCount != 3) {
+			typeWords("Who would you like to battle?");
+		}
+		else {
+			gameWin = true;
 
-		typeWords("Who would you like to battle?");
+		}
 	}
 
 	// handles damage dealing attacks
@@ -427,18 +459,7 @@ $(document).ready(function() {
             default:
             	return .25;
             	break;
-            }
-
-         		/* only have lowering effects
-				-6 .25
-				-5 = .28
-				-4 = .33
-				-3 = .4
-				-2 = .5
-				-1 = .66
-				0 = 1
-
-			*/
+        }
 	}
 
 	//handles the debuff attacks
@@ -570,7 +591,7 @@ $(document).ready(function() {
 		var playerSpeed = pokemon[playerPokemon].speed;
 		var enemySpeed = pokemon[enemyPokemon].speed;
 		var targetFaint = false;
-
+		console.log("Attack stage is " + playerAttackStage + " Defense stage is " + playerDefenseStage);
 		stringHolder = "";
 
 		if (playerSpeed >= enemySpeed) {
@@ -616,14 +637,15 @@ $(document).ready(function() {
 		if (user == 'player') {
 			if (playerCurHP <= 0 ) {
 				stringHolder += "<br />" + pokemon[playerPokemon].name + " fainted."
-				playerAdd(playerPokemon); /// if you ded this is gamer 
+				gameOver = true;
 				return true;
 			}
 			else {return false;}
 		}
 		else {
 			if (enemyCurHP <= 0 ) {
-				stringHolder += "<br /> Enemy " + pokemon[enemyPokemon].name + " fainted."
+				stringHolder += "<br /> Enemy " + pokemon[enemyPokemon].name + " fainted. <br />" + pokemon[playerPokemon].name + " has leveled up! ";
+				winCount ++;
 				pokemon[enemyPokemon].defeated = true;
 				levelUp = true;
 				playerAdd(playerPokemon); // you win
@@ -752,7 +774,210 @@ $(document).ready(function() {
     	$('#blink-icon').delay(200).fadeTo(200,0.0).delay(200).fadeTo(200,1, blink);
      }
 
+
+
 	});
+
+	var pokemonReset = {
+		pikachu: {
+			name:"Pikachu",
+			picture: "assets/images/pikachu.gif",
+			pictureBack: "assets/images/pikachu-back.gif",
+			defeated: false,
+			type: 'electric',
+			hp: 35,
+			attack: 55,
+			defense: 30,
+			special: 50,
+			specDef: 40,
+			speed: 90,
+			moveSet: [
+				{
+					name: "Thunder Shock",
+					power: 40,
+					accuracy: 1,
+					stab: 1.5,
+					attack: true,
+					type: 'electric'
+				},
+				{
+						//lowers def
+					name: "Tail Whip",
+					accuracy: 1,
+					attack: false,
+					stat: 'defense'
+				},
+				{
+						// decreases attack
+					name: "Growl",
+					accuracy: 1,
+					stat: 'attack',
+					attack: false
+
+				},
+				{
+					name:"Quick Attack",
+					power: 40,
+					accuracy: 1,
+					stab: 1,
+					attack: true,
+					type: 'noraml'
+				}
+
+			],
+		},
+
+		squirtle: {
+			name: "Squirtle",
+			picture: "assets/images/squirtle.gif",
+			pictureBack: "assets/images/squirtle-back.gif",
+			defeated: false,
+			type: 'water',
+			hp: 44,
+			attack: 48,
+			defense: 65,
+			special: 50,
+			specDef: 64,
+			speed: 43,
+			moveSet: [
+				{
+					name: "Tackle",
+					power: 35,
+					accuracy: .95,
+					stab: 1,
+					special: false,
+					attack: true,
+					type: 'normal'
+				},
+				{
+					//lowers def
+					name: "Tail Whip",
+					accuracy: 1,
+					attack: false,
+					stat: "defense"
+				},
+				{
+					name: "Bubble",
+					power: 20,
+					stab: 1.5,
+					accuracy: 1,
+					special: true,
+					attack: true,
+					type: 'water'
+
+
+				},
+				{
+					name:"Water Gun",
+					power: 40,
+					accuracy: 1,
+					stab: 1.5,
+					special: true,
+					attack: true,
+					type: 'water'
+
+				}
+			]
+		},
+
+		charmander : {
+		 	name: "Charmander",
+			picture: "assets/images/charmander.gif",
+			pictureBack: "assets/images/charmander-back.gif",
+			defeated: false,
+			type: 'fire',
+			hp: 39,
+			attack: 52,
+			defense: 43,
+			special: 60,
+			specDef: 50,
+			speed: 65,
+			moveSet: [
+				{
+					name: "Scratch",
+					power: 40,
+					accuracy: 1,
+					stab: 1,
+					attack: true,
+					type:'normal'
+				},
+				{
+					name: "Ember",
+					power: 45,
+					accuracy: 1,
+					stab: 1.5,
+					attack: true,
+					type: 'fire'
+				},
+				{
+					//decreases attack
+					name: "Growl",
+					attack: false,
+					accuracy: 1 ,
+					stat: 'attack'
+
+				},
+				{
+					//lowers def 1 stage
+					name:"Leer",
+					stat: 'defense',
+					accuracy: .9,
+					attack: false
+				}
+
+			],
+		},
+
+		bulbasaur : {
+			name: "Bulbasaur",
+			picture: "assets/images/bulbasaur.gif",
+			pictureBack: "assets/images/bulbasaur-back.gif",
+			defeated: false,
+			type: 'grass',
+			hp: 45,
+			attack: 49,
+			defense: 49,
+			special: 65,
+			specDef: 65,
+			speed: 45,
+			
+			moveSet: [
+				{
+					name: "Tackle",
+					power: 35,
+					accuracy: .95,
+					stab: 1,
+					attack: true,
+					type: 'normal'
+				},
+				{
+					name: "Vine Whip",
+					power: 35,
+					accuracy: 1,
+					stab: 1.5,
+					attack: true,
+					type: 'grass'
+				},
+				{
+					//decreases attack
+					name: "Growl",
+					attack: false,
+					stat: 'attack',
+					accuracy: 1
+
+				},
+				{
+					//this has special effects, of stealing health
+					name:"Leech Seed",
+					accuracy: .9,
+					stab: 1.5,
+					attack: false,
+					type: 'grass',
+					stat: 'seed'
+				}
+			],
+		}
+	}
 
 
 
